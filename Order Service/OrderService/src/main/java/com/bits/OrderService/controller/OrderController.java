@@ -1,9 +1,9 @@
 package com.bits.OrderService.controller;
 
 import com.bits.OrderService.entity.Orders;
+import com.bits.OrderService.model.OrderDto;
 import com.bits.OrderService.service.OrderService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -18,28 +18,32 @@ public class OrderController {
     private final OrderService orderService;
 
     @PostMapping("/add-order")
-    public ResponseEntity<Orders> addOrders(@RequestBody Orders orders)
+    public ResponseEntity<Long> addOrders(@RequestBody OrderDto orderDto)
     {
-        return ResponseEntity.ok(orderService.createOrders(orders));
+        return ResponseEntity.ok(orderService.createOrder(orderDto));
     }
 
     @PutMapping("/update/{id}")
-    public ResponseEntity<Orders> updateOrders(@PathVariable("id") Long order_id, @RequestBody Orders orders)
+    public ResponseEntity<OrderDto> updateOrders(@PathVariable("id") Long orderId, @RequestBody OrderDto orderDto)
     {
-        return ResponseEntity.ok(orderService.updateOrders(order_id, orders));
+        OrderDto updatedOrders = orderService.updateOrders(orderId, orderDto);
+        return ResponseEntity.ok(updatedOrders);
     }
 
-    @DeleteMapping("/delete/{id}")
-    public ResponseEntity<Void> deleteOrders(@PathVariable("id") Long order_id)
-    {
-        orderService.deleteOrder(order_id);
-        return ResponseEntity.noContent().build();
-    }
-
-    @GetMapping("/all-orders")
-    public ResponseEntity<List<Orders>> getAllOrders()
+    @GetMapping("all-orders")
+    public ResponseEntity<List<OrderDto>> getAllOrders()
     {
         return ResponseEntity.ok(orderService.getAllOrders());
     }
 
+    @DeleteMapping("/delete/{id}")
+    public ResponseEntity<String> deleteOrder(@PathVariable("id") Long id)
+    {
+        boolean isDeleted = orderService.deleteOrders(id);
+        if (isDeleted) {
+            return ResponseEntity.ok("Order deleted successfully.");
+        } else {
+            return ResponseEntity.status(404).body("Order not found.");
+        }
+    }
 }
