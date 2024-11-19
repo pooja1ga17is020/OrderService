@@ -2,7 +2,6 @@ package com.bits.OrderService.service;
 
 import com.bits.OrderService.Exception.OrderNotFoundException;
 import com.bits.OrderService.entity.Orders;
-import com.bits.OrderService.model.OrderDto;
 import com.bits.OrderService.repository.OrderRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -10,6 +9,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @Transactional
@@ -18,84 +18,41 @@ public class OrderService {
 
     private final OrderRepository orderRepository;
 
-    public Long createOrder(OrderDto orderDto)
+    public Orders saveOrders(Orders orders)
     {
-        Orders order = orderRepository.save(buildOrdersEntity(orderDto));
-        return order.getOrder_id();
+        return orderRepository.save(orders);
     }
 
-    public OrderDto updateOrders(Long orderId, OrderDto orderDto)
+    public Orders updateOrders(Long orderId, Orders orders)
     {
-        Orders orders = orderRepository.findById(orderId)
+        var existingOrder = orderRepository.findById(orderId)
+                .orElseThrow(()-> new OrderNotFoundException("Order not found"));
+        existingOrder.setOrderDate(orders.getOrderDate());
+        existingOrder.setQuantity(orders.getQuantity());
+        existingOrder.setStatus(orders.getStatus());
+        existingOrder.setTotal_price(orders.getTotal_price());
+        existingOrder.setCustomerId(orders.getCustomerId());
+        existingOrder.setDeliveryId(orders.getDeliveryId());
+        existingOrder.setRestaurantId(orders.getRestaurantId());
+        existingOrder.setItem_name(orders.getItem_name());
+        return orderRepository.save(existingOrder);
+    }
+
+    public void deleteOrders(Long orderId)
+    {
+        var existingOrder = orderRepository.findById(orderId)
                 .orElseThrow(() -> new OrderNotFoundException("Order not found"));
-        orders.setRestaurant_name(orderDto.getRestaurant_name());
-        orders.setItem_name(orderDto.getItem_name());
-        orders.setQuantity(orderDto.getQuantity());
-        orders.setStatus(orderDto.getStatus());
-        orders.setTotal_price(orderDto.getTotal_price());
-        orders.setOrderDate(orderDto.getOrderDate());
-        orders.setDelivery_address(orderDto.getDelivery_address());
-        orders.setUser_id(orderDto.getUser_id());
-        Orders updatedOrders = orderRepository.save(orders);
-        return convertEntityToDto(updatedOrders);
+        orderRepository.deleteById(orderId);
     }
 
-    public List<OrderDto> getAllOrders()
+    public List<Orders> getAllOrders()
     {
-        List<OrderDto> orderDtos = new ArrayList<>();
-        List<Orders> orders = orderRepository.findAll();
-        orders.forEach(order -> {
-                    orderDtos.add(OrderDto.builder()
-                                    .restaurant_name(order.getRestaurant_name())
-                                    .item_name(order.getItem_name())
-                                    .quantity(order.getQuantity())
-                                    .status(order.getStatus())
-                                    .total_price(order.getTotal_price())
-                                    .orderDate(order.getOrderDate())
-                                    .delivery_address(order.getDelivery_address())
-                                    .user_id(order.getUser_id())
-                            .build());
-
-                });
-            return orderDtos;
+        return orderRepository.findAll();
     }
 
-    public Boolean deleteOrders(Long id)
+    public Optional<Orders> getOrderById(Long orderId)
     {
-        if(orderRepository.existsById(id))
-        {
-            orderRepository.deleteById(id);
-            return true;
-        }
-        else {
-            return false;
-        }
-    }
-
-    private OrderDto convertEntityToDto(Orders updatedOrders) {
-        return OrderDto.builder()
-                .restaurant_name(updatedOrders.getRestaurant_name())
-                .item_name(updatedOrders.getItem_name())
-                .quantity(updatedOrders.getQuantity())
-                .status(updatedOrders.getStatus())
-                .total_price(updatedOrders.getTotal_price())
-                .orderDate(updatedOrders.getOrderDate())
-                .delivery_address(updatedOrders.getDelivery_address())
-                .user_id(updatedOrders.getUser_id())
-                .build();
-    }
-
-    private Orders buildOrdersEntity(OrderDto orderDto) {
-        return Orders.builder()
-                .restaurant_name(orderDto.getRestaurant_name())
-                .quantity(orderDto.getQuantity())
-                .status(orderDto.getStatus())
-                .item_name(orderDto.getItem_name())
-                .total_price(orderDto.getTotal_price())
-                .orderDate(orderDto.getOrderDate())
-                .delivery_address(orderDto.getDelivery_address())
-                .user_id(orderDto.getUser_id())
-                .build();
+        return orderRepository.findById(orderId);
     }
 
 

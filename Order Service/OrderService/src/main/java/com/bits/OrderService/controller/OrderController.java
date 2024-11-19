@@ -1,13 +1,13 @@
 package com.bits.OrderService.controller;
 
 import com.bits.OrderService.entity.Orders;
-import com.bits.OrderService.model.OrderDto;
 import com.bits.OrderService.service.OrderService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequiredArgsConstructor
@@ -18,32 +18,37 @@ public class OrderController {
     private final OrderService orderService;
 
     @PostMapping("/add-order")
-    public ResponseEntity<Long> addOrders(@RequestBody OrderDto orderDto)
+    public ResponseEntity<Orders> addOrders(@RequestBody Orders orders)
     {
-        return ResponseEntity.ok(orderService.createOrder(orderDto));
+        return ResponseEntity.ok(orderService.saveOrders(orders));
     }
 
     @PutMapping("/update/{id}")
-    public ResponseEntity<OrderDto> updateOrders(@PathVariable("id") Long orderId, @RequestBody OrderDto orderDto)
+    public ResponseEntity<Orders> updateOrders(@PathVariable("id") Long orderId, @RequestBody Orders orders)
     {
-        OrderDto updatedOrders = orderService.updateOrders(orderId, orderDto);
-        return ResponseEntity.ok(updatedOrders);
+        return ResponseEntity.ok(orderService.updateOrders(orderId, orders));
     }
 
-    @GetMapping("all-orders")
-    public ResponseEntity<List<OrderDto>> getAllOrders()
+    @DeleteMapping("/delete/{id}")
+    public ResponseEntity<Void> deleteOrder(@PathVariable("id") Long orderId)
+    {
+        orderService.deleteOrders(orderId);
+        return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/all-orders")
+    public ResponseEntity<List<Orders>> getAllOrders()
     {
         return ResponseEntity.ok(orderService.getAllOrders());
     }
 
-    @DeleteMapping("/delete/{id}")
-    public ResponseEntity<String> deleteOrder(@PathVariable("id") Long id)
+    @GetMapping("/get-order/{id}")
+    public ResponseEntity<Orders> getOrderById(@PathVariable("id") Long orderId)
     {
-        boolean isDeleted = orderService.deleteOrders(id);
-        if (isDeleted) {
-            return ResponseEntity.ok("Order deleted successfully.");
-        } else {
-            return ResponseEntity.status(404).body("Order not found.");
-        }
+        Optional<Orders> orders = orderService.getOrderById(orderId);
+        return orders.map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
     }
+
+
 }
