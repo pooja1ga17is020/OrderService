@@ -3,6 +3,9 @@ package com.bits.OrderService.controller;
 import com.bits.OrderService.entity.Orders;
 import com.bits.OrderService.service.OrderService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -48,6 +51,17 @@ public class OrderController {
         Optional<Orders> orders = orderService.getOrderById(orderId);
         return orders.map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
+    }
+
+    @GetMapping("/customer")
+    public ResponseEntity<Page<Orders>> searchOrdersBasedOnCustomerId(
+            @RequestParam(required = false) Long customerId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "5") int size)
+    {
+        PageRequest pageable = PageRequest.of(page, size);
+        Page<Orders> orders = orderService.searchOrderBasedOnCustomerId(customerId, pageable);
+        return ResponseEntity.ok(orders);
     }
 
 

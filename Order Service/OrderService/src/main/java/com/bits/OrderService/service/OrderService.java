@@ -5,6 +5,8 @@ import com.bits.OrderService.entity.Orders;
 import com.bits.OrderService.repository.OrderRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -53,6 +55,11 @@ public class OrderService {
     public Optional<Orders> getOrderById(Long orderId)
     {
         return orderRepository.findById(orderId);
+    }
+
+    public Page<Orders> searchOrderBasedOnCustomerId(Long customerId, Pageable pageable)
+    {
+        return orderRepository.findByCustomerId(customerId, pageable);
     }
 
 
