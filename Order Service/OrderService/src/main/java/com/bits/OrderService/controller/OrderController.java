@@ -54,13 +54,11 @@ public class OrderController {
     }
 
     @GetMapping("/customer")
-    public ResponseEntity<Page<Orders>> searchOrdersBasedOnCustomerId(
-            @RequestParam(required = false) Long customerId,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "5") int size)
+    public ResponseEntity<Orders> searchOrdersBasedOnCustomerId(
+            @RequestParam(required = false) Long customerId)
+
     {
-        PageRequest pageable = PageRequest.of(page, size);
-        Page<Orders> orders = orderService.searchOrderBasedOnCustomerId(customerId, pageable);
+        Orders orders = orderService.searchOrderBasedOnCustomerId(customerId);
         return ResponseEntity.ok(orders);
     }
 

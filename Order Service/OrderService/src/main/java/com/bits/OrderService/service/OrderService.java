@@ -57,9 +57,9 @@ public class OrderService {
         return orderRepository.findById(orderId);
     }
 
-    public Page<Orders> searchOrderBasedOnCustomerId(Long customerId, Pageable pageable)
+    public Orders searchOrderBasedOnCustomerId(Long customerId)
     {
-        return orderRepository.findByCustomerId(customerId, pageable);
+        return orderRepository.findByCustomerId(customerId);
     }
 
 
